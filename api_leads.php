@@ -5,7 +5,8 @@ header('Access-Control-Allow-Methods: GET');
 
 include 'db.php';
 
-$stmt = $conn->query("SELECT * FROM leads WHERE status = 'Pending' ORDER BY id ASC");
+// Fetch all leads that are not completed ('New', 'Pending', etc.)
+$stmt = $conn->query("SELECT * FROM leads WHERE status != 'Completed' ORDER BY id ASC");
 $leads = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 echo json_encode([
