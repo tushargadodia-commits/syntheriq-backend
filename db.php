@@ -1,19 +1,12 @@
 <?php
-$host = "crm-syncromanager0009.e.aivencloud.com";
-$port = "23715";
-$dbname = "defaultdb";
-$username = "avnadmin";
-$password = "AVNS_JGIR29t1etGmn_Q1FnA";
+$host = "sql113.infinityfree.com";
+$user = "if0_42865625";
+$pass = "tushar0006";
+$dbname = "if0_42865625_syncro_lead_manager";
 
-try {
-    $dsn = "pgsql:host=$host;port=$port;dbname=$dbname;sslmode=require";
-    $conn = new PDO($dsn, $username, $password);
-    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    echo json_encode([
-        'status' => 'error',
-        'message' => 'Database connection failed: ' . $e->getMessage()
-    ]);
-    exit();
+$conn = new mysqli($host, $user, $pass, $dbname);
+
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }
 ?>
