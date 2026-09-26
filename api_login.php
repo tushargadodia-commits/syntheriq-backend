@@ -1,35 +1,40 @@
 <?php
-header("Content-Type: application/json");
-header("Access-Control-Allow-Origin: *");
+header('Content-Type: application/json');
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: POST');
+header('Access-Control-Allow-Headers: Content-Type');
+
 include 'db.php';
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $username = trim(strtolower($_POST['username'] ?? ''));
-    $password = trim($_POST['password'] ?? '');
+$username = $_POST['username'] ?? '';
+$password = $_POST['password'] ?? '';
 
-    // Hardcoded credentials check matching your web CRM users
-    $users = [
-        'tushar' => ['role' => 'admin', 'name' => 'Tushar', 'pass' => '00001111'],
-        'nishant' => ['role' => 'subadmin', 'name' => 'Nishant', 'pass' => 'nishant@123'],
-        'ajay' => ['role' => 'subadmin', 'name' => 'Ajay', 'pass' => 'ajay@123'],
-        'varunmaruya@syntheriq.com' => ['role' => 'subadmin', 'name' => 'Varun', 'pass' => 'varun8287'],
-        'varun' => ['role' => 'subadmin', 'name' => 'Varun', 'pass' => 'varun8287'],
-        'akankshamaurya@syntheriq.com' => ['role' => 'subadmin', 'name' => 'Akanksha', 'pass' => 'akku525650'],
-        'akanksha' => ['role' => 'subadmin', 'name' => 'Akanksha', 'pass' => 'akku525650']
-    ];
+if (empty($username) || empty($password)) {
+    echo json_encode(['status' => 'error', 'message' => 'Please provide both username and password.']);
+    exit();
+}
 
-    if (isset($users[$username]) && $users[$username]['pass'] === $password) {
+$stmt = $conn->prepare("SELECT id, username, password, role, status FROM users WHERE username = ?");
+$stmt->execute([$username]);
+$row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if ($row) {
+    if ($row['status'] === 'disabled') {
+        echo json_encode(['status' => 'error', 'message' => 'Your account has been disabled by the admin.']);
+        exit();
+    }
+
+    if ($password === $row['password'] || password_verify($password, $row['password'])) {
         echo json_encode([
-            "status" => "success",
-            "message" => "Login successful",
-            "role" => $users[$username]['role'],
-            "username" => $users[$username]['name']
+            'status' => 'success',
+            'message' => 'Login successful',
+            'username' => $row['username'],
+            'role' => $row['role']
         ]);
     } else {
-        echo json_encode([
-            "status" => "error",
-            "message" => "Invalid Username or Password"
-        ]);
+        echo json_encode(['status' => 'error', 'message' => 'Invalid password.']);
     }
+} else {
+    echo json_encode(['status' => 'error', 'message' => 'User not found.']);
 }
 ?>
